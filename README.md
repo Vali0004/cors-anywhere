@@ -1,5 +1,4 @@
 [![Build Status](https://travis-ci.com/Rob--W/cors-anywhere.svg?branch=master)](https://travis-ci.com/Rob--W/cors-anywhere)
-[![Coverage Status](https://coveralls.io/repos/github/Rob--W/cors-anywhere/badge.svg?branch=master)](https://coveralls.io/github/Rob--W/cors-anywhere?branch=master)
 
 **CORS Anywhere** is a NodeJS proxy which adds CORS headers to the proxied request.
 
@@ -92,10 +91,10 @@ proxy requests. The following options are supported:
 * function `getProxyForUrl` - If set, specifies which intermediate proxy to use for a given URL.
   If the return value is void, a direct request is sent. The default implementation is
   [`proxy-from-env`](https://github.com/Rob--W/proxy-from-env), which respects the standard proxy
-  environment variables (e.g. `https_proxy`, `no_proxy`, etc.).  
-* array of strings `originBlacklist` - If set, requests whose origin is listed are blocked.  
+  environment variables (e.g. `https_proxy`, `no_proxy`, etc.).
+* array of strings `originBlacklist` - If set, requests whose origin is listed are blocked.
   Example: `['https://bad.example.com', 'http://bad.example.com']`
-* array of strings `originWhitelist` - If set, requests whose origin is not listed are blocked.  
+* array of strings `originWhitelist` - If set, requests whose origin is not listed are blocked.
   If this list is empty, all origins are allowed.
   Example: `['https://good.example.com', 'http://good.example.com']`
 * function `handleInitialRequest` - If set, it is called with the request, response and a parsed
@@ -107,23 +106,26 @@ proxy requests. The following options are supported:
 * boolean `redirectSameOrigin` - If true, requests to URLs from the same origin will not be proxied but redirected.
   The primary purpose for this option is to save server resources by delegating the request to the client
   (since same-origin requests should always succeed, even without proxying).
-* array of strings `requireHeader` - If set, the request must include this header or the API will refuse to proxy.  
-  Recommended if you want to prevent users from using the proxy for normal browsing.  
+* array of strings `requireHeader` - If set, the request must include this header or the API will refuse to proxy.
+  Recommended if you want to prevent users from using the proxy for normal browsing.
   Example: `['Origin', 'X-Requested-With']`.
-* array of lowercase strings `removeHeaders` - Exclude certain headers from being included in the request.  
+* array of lowercase strings `removeHeaders` - Exclude certain headers from being included in the request.
   Example: `["cookie"]`
-* dictionary of lowercase strings `setHeaders` - Set headers for the request (overwrites existing ones).  
+* dictionary of lowercase strings `setHeaders` - Set headers for the request (overwrites existing ones).
   Example: `{"x-powered-by": "CORS Anywhere"}`
-* number `corsMaxAge` - If set, an Access-Control-Max-Age request header with this value (in seconds) will be added.  
+* number `corsMaxAge` - If set, an Access-Control-Max-Age request header with this value (in seconds) will be added.
   Example: `600` - Allow CORS preflight request to be cached by the browser for 10 minutes.
-* string `helpFile` - Set the help file (shown at the homepage).  
+* string `helpFile` - Set the help file (shown at the homepage).
   Example: `"myCustomHelpText.txt"`
 
 For advanced users, the following options are also provided.
 
-* `httpProxyOptions` - Under the hood, [http-proxy](https://github.com/nodejitsu/node-http-proxy)
+* `httpProxyOptions` - Under the hood, [http-proxy-node16](https://github.com/Jimbly/http-proxy-node16)
   is used to proxy requests. Use this option if you really need to pass options
-  to http-proxy. The documentation for these options can be found [here](https://github.com/nodejitsu/node-http-proxy#options).
+  to http-proxy. The documentation for these options can be found [here](https://github.com/Jimbly/http-proxy-node16#options).
+  * `httpProxyOptions.customListeners` - If set, this function is called with the httpProxy instance
+    as argument. This allows you to register custom event listeners, for example to listen for the
+    `proxyReq` event.
 * `httpsOptions` - If set, a `https.Server` will be created. The given options are passed to the
   [`https.createServer`](https://nodejs.org/api/https.html#https_https_createserver_options_requestlistener) method.
 
@@ -149,14 +151,14 @@ port 8080, use:
 ```
 export PORT=8080
 export CORSANYWHERE_WHITELIST=https://example.com,http://example.com,http://example.com:8080
-export CORSANYWHERE_ALLOWED_TARGETS=example.com
+export CORSANYWHERE_WHITELISTED_TARGETS=example.com
 node server.js
 ```
 
-To use allow any request from example.com, regardless of port, or origin, use:
+To use allow any request from example.com, but disallow api.example.com, regardless of port, or origin, use:
 ```
 export PORT=8080
-export CORSANYWHERE_ALLOWED_TARGETS=example.com
+export CORSANYWHERE_WHITELISTED_TARGETS=example.com, api.example.com
 node server.js
 ```
 

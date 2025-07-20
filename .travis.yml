@@ -15,4 +15,4 @@ node_js:
 script:
   - npm run lint
   - npm run test
-  - npm run test-coverage && cat coverage/lcov.info | ./node_modules/.bin/coveralls && rm -rf coverage
+  - npm run test-coverage

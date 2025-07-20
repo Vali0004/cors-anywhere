@@ -7,7 +7,8 @@ var port = process.env.PORT || 8080;
 // again. CORS Anywhere is open by design, and this blacklist is not used, except for countering
 // immediate abuse (e.g. denial of service). If you want to block all origins except for some,
 // use originWhitelist instead.
-var allowedTargets = parseEnvList(process.env.CORSANYWHERE_ALLOWED_TARGETS);
+var targetWhitelist = parseEnvList(process.env.CORSANYWHERE_WHITELISTED_TARGETS);
+var targetBlacklist = parseEnvList(process.env.CORSANYWHERE_BLACKLISTED_TARGETS);
 var originBlacklist = parseEnvList(process.env.CORSANYWHERE_BLACKLIST);
 var originWhitelist = parseEnvList(process.env.CORSANYWHERE_WHITELIST);
 function parseEnvList(env) {
@@ -21,10 +22,12 @@ function parseEnvList(env) {
 var checkRateLimit = require('./lib/rate-limit')(process.env.CORSANYWHERE_RATELIMIT);
 
 var cors_proxy = require('./lib/cors-anywhere');
+var dns = require('dns');
 cors_proxy.createServer({
   originBlacklist: originBlacklist,
   originWhitelist: originWhitelist,
-  allowedTargets: allowedTargets,
+  targetWhitelist: targetWhitelist,
+  targetBlacklist: targetBlacklist,
   requireHeader: ['origin', 'x-requested-with'],
   checkRateLimit: checkRateLimit,
   removeHeaders: [
@@ -45,6 +48,25 @@ cors_proxy.createServer({
   httpProxyOptions: {
     // Do not add X-Forwarded-For, etc. headers, because Heroku already adds it.
     xfwd: false,
+
+  },
+  dnsLookup: function (hostname, callback) {
+    var excludedHostnamePrefixes = [
+      '169.254.',
+      '127.',
+      '0:0:0:0:0:0:0:1',
+      '::1',
+      '10.',
+      '172.16.',
+      '192.168.',
+      'fe80::10'
+    ];
+    dns.lookup(hostname, { hints: dns.ADDRCONFIG }, (err, address, family) => {
+      if (excludedHostnamePrefixes.some(p => address.startsWith(p))) {
+        err = 'ExcludedAddress'
+      }
+      callback(err, address, family);
+    });
   },
 }).listen(port, host, function() {
   console.log('Running CORS Anywhere on ' + host + ':' + port);
