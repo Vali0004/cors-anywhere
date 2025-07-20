@@ -149,6 +149,14 @@ port 8080, use:
 ```
 export PORT=8080
 export CORSANYWHERE_WHITELIST=https://example.com,http://example.com,http://example.com:8080
+export CORSANYWHERE_ALLOWED_TARGETS=example.com
+node server.js
+```
+
+To use allow any request from example.com, regardless of port, or origin, use:
+```
+export PORT=8080
+export CORSANYWHERE_ALLOWED_TARGETS=example.com
 node server.js
 ```
 
